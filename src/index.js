@@ -1,6 +1,7 @@
 class Entity {
     constructor(options) {
         this.id = Game.idResolver.getId();
+        this.type = options.type;
         this.x = options.x;
         this.y = options.y;
         this.width = options.width;
@@ -27,6 +28,7 @@ class Entity {
 class Spaceship extends Entity {
     constructor() {
         super({
+            type: 'spaceship',
             x: (Game.size.width / 2 - (Game.size.width * 0.05) / 2),
             y: (Game.size.height * 0.95 - (Game.size.height * 0.05)),
             width: Game.size.width * 0.05,
@@ -58,11 +60,14 @@ class Spaceship extends Entity {
 class Bullet extends Entity {
     constructor(coords) {
         super({
+            type: 'bullet',
             x: coords.x,
             y: coords.y,
             width: Game.size.width * 0.01,
             height: Game.size.height * 0.01
         });
+
+        this.radius = this.width / 2;
     }
 
     drow() {
@@ -70,7 +75,7 @@ class Bullet extends Entity {
         Game.ctx.fillStyle = 'green';
 
         Game.ctx.beginPath();
-        Game.ctx.arc(this.x, this.y, this.width / 2, 0, 2 * Math.PI);
+        Game.ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
         Game.ctx.stroke();
         Game.ctx.fill();
     }
@@ -83,11 +88,14 @@ class Bullet extends Entity {
 class Enemy extends Entity {
     constructor() {
         super({
+            type: 'enemy',
             x: Math.random() * (Game.size.width * 0.9) + Game.size.width * 0.05,
             y: Math.random() * (Game.size.height * 0.4) + (Game.size.height * 0.05),
             width: Game.size.width * 0.05,
             height: Game.size.height * 0.05
         });
+
+        this.radius = this.width / 2;
     }
 
     drow() {
@@ -95,7 +103,7 @@ class Enemy extends Entity {
         Game.ctx.fillStyle = 'red';
 
         Game.ctx.beginPath();
-        Game.ctx.arc(this.x, this.y, this.width / 2, 0, 2 * Math.PI);
+        Game.ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
         Game.ctx.stroke();
         Game.ctx.fill();
     }
@@ -175,12 +183,35 @@ class Game {
 
     start() {
         window.setInterval(() => {
+            const entitiesByType = {
+                spaceship: [],
+                enemy: [],
+                bullet: []
+            };
+
             Game.entities.forEach(function (entity) {
                 entity.move();
 
                 if (!entity.isOnScrean()) {
                     Game.garbageCollector.collect(entity.id);
+                } else {
+                    entitiesByType[entity.type].push(entity);
                 }
+            });
+
+            entitiesByType.bullet.forEach(function (bullet) {
+                entitiesByType.enemy.some(function (enemy) {
+                    const distance = Math.sqrt(Math.pow(enemy.x - bullet.x, 2) + Math.pow(enemy.y - bullet.y, 2));
+
+                    if (enemy.radius + bullet.radius > distance) {
+                        Game.garbageCollector.collect(enemy.id);
+                        Game.garbageCollector.collect(bullet.id);
+
+                        return true;
+                    }
+
+                    return false;
+                });
             });
 
             Game.entities = Game.garbageCollector.removeEntities(Game.entities);
