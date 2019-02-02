@@ -29,37 +29,48 @@ class Spaceship extends Entity {
     constructor(config) {
         super({
             type: 'spaceship',
-            x: (Game.size.width / 2 - (Game.size.width * 0.05) / 2),
-            y: (Game.size.height * 0.95 - (Game.size.height * 0.05)),
-            width: Game.size.width * 0.05,
-            height: Game.size.height * 0.05
+            x: Game.size.width / 2,
+            y: Game.size.height - Game.size.height * 0.1,
+            width: Game.size.width * 0.07,
+            height: Game.size.height * 0.07
         });
 
+        this.radius = this.width / 2;
         this.config = config;
 
+        this.eventListener = null;
+
         if (this.config.isMouseEnabled) {
-            window.addEventListener('click', () => {
+            this.eventListener = () => {
                 this.strike();
-            });
+            };
+
+            window.addEventListener('click', this.eventListener);
         } else {
-            window.addEventListener('keydown', (event) => {
-                console.log(this.config.strikeKey);
+            this.eventListener = (event) => {
                 if (event.key === this.config.strikeKey) {
                     this.strike();
                 }
-            });
+            };
+            window.addEventListener('keydown', this.eventListener);
         }
     }
 
     draw() {
+        Game.ctx.strokeStyle = this.config.color;
         Game.ctx.fillStyle = this.config.color;
-        Game.ctx.fillRect(this.x, this.y, this.width, this.height);
+
+        Game.ctx.beginPath();
+        Game.ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+        Game.ctx.stroke();
+        Game.ctx.fill();
+
         Game.ctx.fillStyle = 'white';
         Game.ctx.font = "20px Arial";
         Game.ctx.textAlign = "center";
         Game.ctx.fillText(Game.options.spaceships.find((spaceship) => {
             return spaceship.name === this.config.name;
-        }).score, this.x + this.width / 2, this.y + this.height * 0.75);
+        }).score, this.x, this.y + 7);
     }
 
     move() {
@@ -82,10 +93,15 @@ class Spaceship extends Entity {
 
     strike() {
         Game.entities.push(new Bullet({
-            x: this.x + this.width / 2,
+            x: this.x,
             y: this.y,
             nameSpaceship: this.config.name
         }));
+    }
+
+    destroy() {
+        window.removeEventListener('click', this.eventListener);
+        window.removeEventListener('keydown', this.eventListener);        
     }
 }
 
@@ -304,7 +320,7 @@ class Game {
                     if (enemy.radius + bullet.radius > distance) {
                         Game.garbageCollector.collect(enemy.id);
                         Game.garbageCollector.collect(bullet.id);
-                        const spaceship = Game.options.spaceships.find(function(spaceship) {
+                        const spaceship = Game.options.spaceships.find(function (spaceship) {
                             return spaceship.name === bullet.nameSpaceship;
                         });
                         spaceship.score += Math.round(enemy.speed * 10);
@@ -314,6 +330,24 @@ class Game {
                     return false;
                 });
             });
+
+            entitiesByType.spaceship.forEach(function (spaceship) {
+                entitiesByType.enemy.some(function (enemy) {
+                    const distance = Math.sqrt(Math.pow(enemy.x - spaceship.x, 2) + Math.pow(enemy.y - spaceship.y, 2));
+
+                    if (enemy.radius + spaceship.radius > distance) {
+                        Game.garbageCollector.collect(enemy.id);
+                        Game.garbageCollector.collect(spaceship.id);
+
+                        spaceship.destroy();
+
+                        return true;
+                    }
+
+                    return false;
+                });
+            });
+
 
             Game.entities = Game.garbageCollector.removeEntities(Game.entities);
 
