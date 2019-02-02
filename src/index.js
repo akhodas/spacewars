@@ -8,14 +8,14 @@ class Entity {
         this.height = options.height;
     }
 
-    drow() { }
+    draw() { }
 
     move() { }
 
     isOnScrean() {
         if (
-            this.y < 0 ||
-            this.y > Game.size.height ||
+            this.y < -Enemy.calculateSize() ||
+            this.y > Game.size.height + Enemy.calculateSize() ||
             this.x < 0 ||
             this.x > Game.size.width
         ) {
@@ -40,9 +40,13 @@ class Spaceship extends Entity {
         });
     }
 
-    drow() {
+    draw() {
         Game.ctx.fillStyle = 'black';
         Game.ctx.fillRect(this.x, this.y, this.width, this.height);
+        Game.ctx.fillStyle = 'white';        
+        Game.ctx.font = "20px Arial";
+        Game.ctx.textAlign = "center";
+        Game.ctx.fillText(Game.score, this.x + this.width / 2, this.y + this.height * 0.75);
     }
 
     move() {
@@ -70,7 +74,7 @@ class Bullet extends Entity {
         this.radius = this.width / 2;
     }
 
-    drow() {
+    draw() {
         Game.ctx.strokeStyle = 'green';
         Game.ctx.fillStyle = 'green';
 
@@ -81,7 +85,7 @@ class Bullet extends Entity {
     }
 
     move() {
-        this.y -= Game.size.height * 0.005;
+        this.y -= Game.size.height * 0.01;
     }
 }
 
@@ -90,15 +94,17 @@ class Enemy extends Entity {
         super({
             type: 'enemy',
             x: Math.random() * (Game.size.width * 0.9) + Game.size.width * 0.05,
-            y: Math.random() * (Game.size.height * 0.4) + (Game.size.height * 0.05),
-            width: Game.size.width * 0.05,
-            height: Game.size.height * 0.05
+            y: 0,
+            width: Enemy.calculateSize(),
+            height: Enemy.calculateSize()
         });
 
+        this.speed = Math.random() + 0.2;
         this.radius = this.width / 2;
+        this.y = -this.radius;
     }
 
-    drow() {
+    draw() {
         Game.ctx.strokeStyle = 'red';
         Game.ctx.fillStyle = 'red';
 
@@ -106,6 +112,14 @@ class Enemy extends Entity {
         Game.ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
         Game.ctx.stroke();
         Game.ctx.fill();
+    }
+
+    move() {
+        this.y += Game.size.height * 0.01 * this.speed;
+    }
+
+    static calculateSize() {
+        return Game.size.width * 0.05;
     }
 }
 
@@ -172,6 +186,7 @@ class Game {
     static garbageCollector = new GarbageCollector();
     static mouseMoveTracker = new MouseMoveTracker(Game.canvas);
     static entities = [];
+    static score = 0;
 
     constructor() {
         Game.canvas.width = Game.size.width;
@@ -182,7 +197,14 @@ class Game {
     }
 
     start() {
+        let counter = 0;
         window.setInterval(() => {
+            counter++;
+            if (counter === 25) {
+                Game.entities.push(new Enemy());
+                counter = 0;
+            }
+
             const entitiesByType = {
                 spaceship: [],
                 enemy: [],
@@ -206,7 +228,7 @@ class Game {
                     if (enemy.radius + bullet.radius > distance) {
                         Game.garbageCollector.collect(enemy.id);
                         Game.garbageCollector.collect(bullet.id);
-
+                        Game.score += Math.round(enemy.speed * 10);
                         return true;
                     }
 
@@ -219,17 +241,13 @@ class Game {
             Game.ctx.clearRect(0, 0, Game.size.width, Game.size.height);
 
             Game.entities.forEach(function (entity) {
-                entity.drow();
+                entity.draw();
             });
         }, 20);
     }
 
     init() {
         Game.entities.push(new Spaceship());
-
-        for (let index = 0; index < Game.options.enemyCount; index++) {
-            Game.entities.push(new Enemy());
-        }
     }
 }
 
