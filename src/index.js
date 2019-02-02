@@ -26,7 +26,7 @@ class Entity {
 }
 
 class Spaceship extends Entity {
-    constructor() {
+    constructor(config) {
         super({
             type: 'spaceship',
             x: (Game.size.width / 2 - (Game.size.width * 0.05) / 2),
@@ -35,42 +35,71 @@ class Spaceship extends Entity {
             height: Game.size.height * 0.05
         });
 
-        window.addEventListener('click', () => {
-            this.strike();
-        });
+        this.config = config;
+
+        if (this.config.isMouseEnabled) {
+            window.addEventListener('click', () => {
+                this.strike();
+            });
+        } else {
+            window.addEventListener('keydown', (event) => {
+                console.log(this.config.strikeKey);
+                if (event.key === this.config.strikeKey) {
+                    this.strike();
+                }
+            });
+        }
     }
 
     draw() {
-        Game.ctx.fillStyle = 'black';
+        Game.ctx.fillStyle = this.config.color;
         Game.ctx.fillRect(this.x, this.y, this.width, this.height);
-        Game.ctx.fillStyle = 'white';        
+        Game.ctx.fillStyle = 'white';
         Game.ctx.font = "20px Arial";
         Game.ctx.textAlign = "center";
-        Game.ctx.fillText(Game.score, this.x + this.width / 2, this.y + this.height * 0.75);
+        Game.ctx.fillText(Game.options.spaceships.find((spaceship) => {
+            return spaceship.name === this.config.name;
+        }).score, this.x + this.width / 2, this.y + this.height * 0.75);
     }
 
     move() {
-        this.x = Game.mouseMoveTracker.getCurrentPosition().x;
+        if (this.config.isMouseEnabled) {
+            this.x = Game.mouseMoveTracker.getCurrentPosition().x;
+        } else {
+            const delta = Game.size.width * 0.01;
+
+            if (Game.keyTracker.isKeyPressed(this.config.leftKey)) {
+                if (this.x > delta) {
+                    this.x -= delta;
+                }
+            } else if (Game.keyTracker.isKeyPressed(this.config.rightKey)) {
+                if (this.x < Game.size.width - delta) {
+                    this.x += delta;
+                }
+            }
+        }
     }
 
     strike() {
         Game.entities.push(new Bullet({
             x: this.x + this.width / 2,
-            y: this.y
+            y: this.y,
+            nameSpaceship: this.config.name
         }));
     }
 }
 
 class Bullet extends Entity {
-    constructor(coords) {
+    constructor(options) {
         super({
             type: 'bullet',
-            x: coords.x,
-            y: coords.y,
+            x: options.x,
+            y: options.y,
             width: Game.size.width * 0.01,
             height: Game.size.height * 0.01
         });
 
+        this.nameSpaceship = options.nameSpaceship;
         this.radius = this.width / 2;
     }
 
@@ -142,6 +171,24 @@ class MouseMoveTracker {
     }
 }
 
+class KeyTracker {
+    constructor() {
+        this.keys = {};
+
+        window.addEventListener('keydown', (event) => {
+            this.keys[event.key] = true;
+        });
+
+        window.addEventListener('keyup', (event) => {
+            this.keys[event.key] = false;
+        });
+    }
+
+    isKeyPressed(key) {
+        return !!this.keys[key];
+    }
+}
+
 class IdGenerator {
     constructor() {
         this._id = 0;
@@ -180,11 +227,40 @@ class Game {
         height: window.innerHeight
     };
     static options = {
-        enemyCount: 10
+        spaceships: [
+            {
+                isMouseEnabled: true,
+                name: '1',
+                score: 0,
+                leftKey: 'ArrowLeft',
+                rightKey: 'ArrowRight',
+                strikeKey: ' ',
+                color: 'black'
+            },
+            {
+                isMouseEnabled: false,
+                name: '2',
+                score: 0,
+                leftKey: 'a',
+                rightKey: 'd',
+                strikeKey: 'z',
+                color: 'blue'
+            },
+            {
+                isMouseEnabled: false,
+                name: '3',
+                score: 0,
+                leftKey: '8',
+                rightKey: '9',
+                strikeKey: '7',
+                color: 'pink'
+            }
+        ]
     };
     static idResolver = new IdGenerator();
     static garbageCollector = new GarbageCollector();
     static mouseMoveTracker = new MouseMoveTracker(Game.canvas);
+    static keyTracker = new KeyTracker();
     static entities = [];
     static score = 0;
 
@@ -228,7 +304,10 @@ class Game {
                     if (enemy.radius + bullet.radius > distance) {
                         Game.garbageCollector.collect(enemy.id);
                         Game.garbageCollector.collect(bullet.id);
-                        Game.score += Math.round(enemy.speed * 10);
+                        const spaceship = Game.options.spaceships.find(function(spaceship) {
+                            return spaceship.name === bullet.nameSpaceship;
+                        });
+                        spaceship.score += Math.round(enemy.speed * 10);
                         return true;
                     }
 
@@ -247,7 +326,9 @@ class Game {
     }
 
     init() {
-        Game.entities.push(new Spaceship());
+        Game.options.spaceships.forEach(function (spaceship) {
+            Game.entities.push(new Spaceship(spaceship));
+        });
     }
 }
 
