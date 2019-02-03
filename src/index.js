@@ -31,8 +31,8 @@ class Spaceship extends Entity {
             type: 'spaceship',
             x: Game.size.width / 2,
             y: Game.size.height - Game.size.height * 0.1,
-            width: Game.size.width * 0.07,
-            height: Game.size.height * 0.07
+            width: Game.size.width * 0.055,
+            height: Game.size.height * 0.055
         });
 
         this.radius = this.width / 2;
@@ -63,19 +63,27 @@ class Spaceship extends Entity {
         Game.ctx.beginPath();
         Game.ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
         Game.ctx.stroke();
-        Game.ctx.fill();
+        // Game.ctx.fill();
 
-        Game.ctx.fillStyle = 'white';
+        const img = new Image();
+        img.src = this.config.image;
+        img.onload = () => {
+            Game.ctx.drawImage(img, this.x - this.radius, this.y - this.radius, this.width, this.width);
+        };
+
+
+        Game.ctx.fillStyle = this.config.image;
         Game.ctx.font = "20px Arial";
         Game.ctx.textAlign = "center";
         Game.ctx.fillText(Game.options.spaceships.find((spaceship) => {
             return spaceship.name === this.config.name;
-        }).score, this.x, this.y + 7);
+        }).score, this.x, this.y + 2 * this.radius);
     }
 
     move() {
         if (this.config.isMouseEnabled) {
             this.x = Game.mouseMoveTracker.getCurrentPosition().x;
+            this.y = Game.mouseMoveTracker.getCurrentPosition().y;
         } else {
             const delta = Game.size.width * 0.01;
 
@@ -95,13 +103,14 @@ class Spaceship extends Entity {
         Game.entities.push(new Bullet({
             x: this.x,
             y: this.y,
-            nameSpaceship: this.config.name
+            nameSpaceship: this.config.name,
+            colorSpaceship: this.config.color
         }));
     }
 
     destroy() {
         window.removeEventListener('click', this.eventListener);
-        window.removeEventListener('keydown', this.eventListener);        
+        window.removeEventListener('keydown', this.eventListener);
     }
 }
 
@@ -117,11 +126,12 @@ class Bullet extends Entity {
 
         this.nameSpaceship = options.nameSpaceship;
         this.radius = this.width / 2;
+        this.color = options.colorSpaceship;
     }
 
     draw() {
-        Game.ctx.strokeStyle = 'green';
-        Game.ctx.fillStyle = 'green';
+        Game.ctx.strokeStyle = this.color;
+        Game.ctx.fillStyle = this.color;
 
         Game.ctx.beginPath();
         Game.ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
@@ -150,13 +160,23 @@ class Enemy extends Entity {
     }
 
     draw() {
-        Game.ctx.strokeStyle = 'red';
-        Game.ctx.fillStyle = 'red';
+        Game.ctx.strokeStyle = 'black';
+        Game.ctx.fillStyle = '#A9A9A9';
 
         Game.ctx.beginPath();
         Game.ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
         Game.ctx.stroke();
+
         Game.ctx.fill();
+
+        /* Для отрисовки астероидов закоментировать код ""Game.ctx.fill();"" и 
+            раскоментировать 5 строк внизу*/
+
+        // const img = new Image();
+        // img.src = 'img/asteroid.png';
+        // img.onload = () => {
+        //     Game.ctx.drawImage(img, this.x - this.radius, this.y - this.radius, this.width, this.width);
+        // };
     }
 
     move() {
@@ -164,7 +184,7 @@ class Enemy extends Entity {
     }
 
     static calculateSize() {
-        return Game.size.width * 0.05;
+        return Game.size.width * 0.035;
     }
 }
 
@@ -247,29 +267,22 @@ class Game {
             {
                 isMouseEnabled: true,
                 name: '1',
+                image: 'img/spaceship.png',
                 score: 0,
                 leftKey: 'ArrowLeft',
                 rightKey: 'ArrowRight',
                 strikeKey: ' ',
-                color: 'black'
+                color: 'red'
             },
             {
                 isMouseEnabled: false,
                 name: '2',
+                image: 'img/spaceship.png',
                 score: 0,
                 leftKey: 'a',
                 rightKey: 'd',
                 strikeKey: 'z',
                 color: 'blue'
-            },
-            {
-                isMouseEnabled: false,
-                name: '3',
-                score: 0,
-                leftKey: '8',
-                rightKey: '9',
-                strikeKey: '7',
-                color: 'pink'
             }
         ]
     };
@@ -356,7 +369,7 @@ class Game {
             Game.entities.forEach(function (entity) {
                 entity.draw();
             });
-        }, 20);
+        }, 16.67);
     }
 
     init() {
