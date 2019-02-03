@@ -72,11 +72,11 @@ class Spaceship extends Entity {
 
 
         Game.ctx.fillStyle = 'white';
-        Game.ctx.font = "20px Arial";
+        Game.ctx.font = "" + 0.7 * this.radius + "px Arial";
         Game.ctx.textAlign = "center";
         Game.ctx.fillText(Game.options.spaceships.find((spaceship) => {
             return spaceship.name === this.config.name;
-        }).score, this.x, this.y + 2 * this.radius);
+        }).score, this.x, this.y + 1.7 * this.radius);
     }
 
     move() {
@@ -133,7 +133,7 @@ class Bullet extends Entity {
         Game.ctx.fillStyle = this.color;
 
         Game.ctx.beginPath();
-        Game.ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+        Game.ctx.arc(this.x, this.y, this.radius * 0.5, 0, 2 * Math.PI);
         Game.ctx.stroke();
         Game.ctx.fill();
     }
@@ -183,6 +183,42 @@ class Enemy extends Entity {
 
     static calculateSize() {
         return Game.size.width * 0.045;
+    }
+}
+
+class InfoBlockPlayer extends Entity {
+    static counter = 1;
+
+    constructor(config) {
+        super({
+            type: 'infoBlockPlayer',
+            x: Game.size.width * 0.05,
+            y: Game.size.height * 0.05,
+            width: Game.size.width * 0.05,
+            height: Game.size.height * 0.05
+        });
+
+        this.radius = this.width / 2;
+        this.config = config;
+        this.position = InfoBlockPlayer.counter++;
+    }
+
+    draw() {
+        Game.ctx.strokeStyle = this.config.color;
+        Game.ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+
+        Game.ctx.beginPath();
+        Game.ctx.arc(this.x, (2.3 * this.position - 1) * this.radius, this.radius, 0, 2 * Math.PI);
+        Game.ctx.lineWidth = Game.size.width * 0.005;
+        Game.ctx.stroke();
+        Game.ctx.fill();
+
+        Game.ctx.fillStyle = this.config.color;
+        Game.ctx.font = "" + this.radius * 0.7 + "px Arial";
+        Game.ctx.textAlign = "center";
+        Game.ctx.fillText(Game.options.spaceships.find((spaceship) => {
+            return spaceship.name === this.config.name;
+        }).score, this.x, (2.3 * this.position - 0.75) * this.radius);
     }
 }
 
@@ -322,7 +358,7 @@ class Game {
                 Game.entities.push(new Enemy());
                 counter = 0;
             }
-            if (Game.speedGame.counter === 250) {
+            if (Game.speedGame.counter === 500) {
                 Game.speedGame.speed += 0.1;
                 Game.speedGame.counter = 0;
             }
@@ -330,7 +366,8 @@ class Game {
             const entitiesByType = {
                 spaceship: [],
                 enemy: [],
-                bullet: []
+                bullet: [],
+                infoBlockPlayer: []
             };
 
             Game.entities.forEach(function (entity) {
@@ -398,6 +435,7 @@ class Game {
 
         Game.options.spaceships.forEach(function (spaceship) {
             Game.entities.push(new Spaceship(spaceship));
+            Game.entities.push(new InfoBlockPlayer(spaceship));
         });
 
         const img2 = new Image();
