@@ -62,17 +62,16 @@ class Spaceship extends Entity {
 
         Game.ctx.beginPath();
         Game.ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
+        Game.ctx.lineWidth = this.radius * 0.1;
         Game.ctx.stroke();
         // Game.ctx.fill();
 
-        const img = new Image();
-        img.src = this.config.image;
-        img.onload = () => {
-            Game.ctx.drawImage(img, this.x - this.radius, this.y - this.radius, this.width, this.width);
-        };
+        Game.ctx.drawImage(
+            Game.imageResources.spaceship.image,
+            this.x - this.radius, this.y - this.radius, this.width, this.width);
 
 
-        Game.ctx.fillStyle = this.config.image;
+        Game.ctx.fillStyle = 'white';
         Game.ctx.font = "20px Arial";
         Game.ctx.textAlign = "center";
         Game.ctx.fillText(Game.options.spaceships.find((spaceship) => {
@@ -165,26 +164,25 @@ class Enemy extends Entity {
 
         Game.ctx.beginPath();
         Game.ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI);
-        Game.ctx.stroke();
+        // Game.ctx.stroke();
 
-        Game.ctx.fill();
+        // Game.ctx.fill();
 
         /* Для отрисовки астероидов закоментировать код ""Game.ctx.fill();"" и 
-            раскоментировать 5 строк внизу*/
+            раскоментировать 3 строки внизу*/
 
-        // const img = new Image();
-        // img.src = 'img/asteroid.png';
-        // img.onload = () => {
-        //     Game.ctx.drawImage(img, this.x - this.radius, this.y - this.radius, this.width, this.width);
-        // };
+        Game.ctx.drawImage(
+            Game.imageResources.enemy.image,
+            this.x - this.radius, this.y - this.radius, this.width, this.width);
+
     }
 
     move() {
-        this.y += Game.size.height * 0.01 * this.speed;
+        this.y += Game.size.height * 0.01 * this.speed * Game.speedGame.speed;
     }
 
     static calculateSize() {
-        return Game.size.width * 0.035;
+        return Game.size.width * 0.045;
     }
 }
 
@@ -292,6 +290,20 @@ class Game {
     static keyTracker = new KeyTracker();
     static entities = [];
     static score = 0;
+    static speedGame = {
+        counter: 0,
+        speed: 1
+    };
+    static imageResources = {
+        spaceship: {
+            resourse: 'img/spaceship.png',
+            image: null
+        },
+        enemy: {
+            resourse: 'img/asteroid.png',
+            image: null
+        }
+    };
 
     constructor() {
         Game.canvas.width = Game.size.width;
@@ -304,10 +316,15 @@ class Game {
     start() {
         let counter = 0;
         window.setInterval(() => {
+            Game.speedGame.counter++;
             counter++;
-            if (counter === 25) {
+            if (counter > (25 / Game.speedGame.speed)) {
                 Game.entities.push(new Enemy());
                 counter = 0;
+            }
+            if (Game.speedGame.counter === 250) {
+                Game.speedGame.speed += 0.1;
+                Game.speedGame.counter = 0;
             }
 
             const entitiesByType = {
@@ -369,13 +386,25 @@ class Game {
             Game.entities.forEach(function (entity) {
                 entity.draw();
             });
-        }, 16.67);
+        }, 20);
     }
 
     init() {
+        const img1 = new Image();
+        img1.src = Game.imageResources.spaceship.resourse;
+        img1.onload = () => {
+            Game.imageResources.spaceship.image = img1;
+        };
+
         Game.options.spaceships.forEach(function (spaceship) {
             Game.entities.push(new Spaceship(spaceship));
         });
+
+        const img2 = new Image();
+        img2.src = Game.imageResources.enemy.resourse;
+        img2.onload = () => {
+            Game.imageResources.enemy.image = img2;
+        };
     }
 }
 
