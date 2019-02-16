@@ -4,7 +4,8 @@
   "description": "web game",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack --watch"
   },
   "keywords": [
     "game",
@@ -13,5 +14,13 @@
     "wars"
   ],
   "author": "Khodas Aliaksandr",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/core": "^7.3.3",
+    "@babel/plugin-proposal-class-properties": "^7.3.3",
+    "@babel/preset-env": "^7.3.1",
+    "babel-loader": "^8.0.5",
+    "webpack": "^4.29.4",
+    "webpack-cli": "^3.2.3"
+  }
 }
