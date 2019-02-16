@@ -1,0 +1,14 @@
+body {
+    margin: 0;
+    padding: 0;
+}
+
+canvas {
+    position: fixed;
+    margin: 0;
+    padding: 0;
+    
+    background-image: url('img/cosmos.jpg');
+    background-size: cover;
+    /* background-color: aquamarine; */
+}
