@@ -1,4 +1,6 @@
-import {Game} from './modules/Game';
+import { Game } from "./modules/Game";
 
 window.Game = Game;
-new Game();
+const game = new Game();
+game.init();
+game.start();
