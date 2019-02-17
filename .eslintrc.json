@@ -1,0 +1,26 @@
+{
+    "parser": "babel-eslint",
+    "env": {
+        "browser": true,
+        "es6": true
+    },
+    "extends": "airbnb-base",
+    "globals": {
+        "Game": "readonly",
+        "Atomics": "readonly",
+        "SharedArrayBuffer": "readonly"
+    },
+    "parserOptions": {
+        "ecmaVersion": 2018,
+        "sourceType": "module"
+    },
+    "rules": {
+        "import/no-cycle": "false",
+        "import/prefer-default-export": "false",
+        "linebreak-style": ["error", "windows"],
+        "no-underscore-dangle": "off",
+        "no-plusplus": "off",
+        "class-methods-use-this": "off",
+        "no-restricted-properties": "off"
+    }
+}

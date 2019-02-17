@@ -1,9 +1,11 @@
 export class IdGenerator {
-    constructor() {
-        this._id = 0;
-    }
+  constructor() {
+    this._id = 0;
+  }
 
-    getId() {
-        return this._id++;
-    }
+  getId() {
+    this._id += 1;
+
+    return this._id;
+  }
 }
