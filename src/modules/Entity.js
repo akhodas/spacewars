@@ -1,4 +1,4 @@
-import { Enemy } from './Enemy';
+import { Enemy } from "./Enemy";
 
 export class Entity {
   constructor(options) {
@@ -10,16 +10,16 @@ export class Entity {
     this.height = options.height;
   }
 
-  draw() { }  // eslint-disable-line
+  draw() {} // eslint-disable-line
 
-  move() { } // eslint-disable-line
+  move() {} // eslint-disable-line
 
   isOnScrean() {
     if (
-      this.y < -Enemy.calculateSize()
-      || this.y > Game.size.height + Enemy.calculateSize()
-      || this.x < 0
-      || this.x > Game.size.width
+      this.y < -Enemy.calculateSize() ||
+      this.y > Game.size.height + Enemy.calculateSize() ||
+      this.x < 0 ||
+      this.x > Game.size.width
     ) {
       return false;
     }

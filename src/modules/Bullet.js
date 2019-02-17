@@ -1,13 +1,13 @@
-import { Entity } from './Entity';
+import { Entity } from "./Entity";
 
 export class Bullet extends Entity {
   constructor(options) {
     super({
-      type: 'bullet',
+      type: "bullet",
       x: options.x,
       y: options.y,
       width: Game.size.width * 0.01,
-      height: Game.size.height * 0.01,
+      height: Game.size.height * 0.01
     });
     this.nameSpaceship = options.nameSpaceship;
     this.radius = this.width / 2;

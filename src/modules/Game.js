@@ -1,44 +1,44 @@
-import { IdGenerator } from './IdGenerator';
-import { GarbageCollector } from './GarbageCollector';
-import { MouseMoveTracker } from './MouseMoveTracker';
-import { KeyTracker } from './KeyTracker';
-import { Enemy } from './Enemy';
-import { Spaceship } from './Spaceship';
-import { InfoBlockPlayer } from './InfoBlockPlayer';
+import { IdGenerator } from "./IdGenerator";
+import { GarbageCollector } from "./GarbageCollector";
+import { MouseMoveTracker } from "./MouseMoveTracker";
+import { KeyTracker } from "./KeyTracker";
+import { Enemy } from "./Enemy";
+import { Spaceship } from "./Spaceship";
+import { InfoBlockPlayer } from "./InfoBlockPlayer";
 
 export class Game {
-  static canvas = document.getElementsByClassName('space')[0];
+  static canvas = document.getElementsByClassName("space")[0];
 
-  static ctx = Game.canvas.getContext('2d');
+  static ctx = Game.canvas.getContext("2d");
 
   static size = {
     width: window.innerWidth,
-    height: window.innerHeight,
+    height: window.innerHeight
   };
 
   static options = {
     spaceships: [
       {
         isMouseEnabled: true,
-        name: '1',
-        image: 'img/spaceship.png',
+        name: "1",
+        image: "img/spaceship.png",
         score: 0,
-        leftKey: 'ArrowLeft',
-        rightKey: 'ArrowRight',
-        strikeKey: ' ',
-        color: 'red',
+        leftKey: "ArrowLeft",
+        rightKey: "ArrowRight",
+        strikeKey: " ",
+        color: "red"
       },
       {
         isMouseEnabled: false,
-        name: '2',
-        image: 'img/spaceship.png',
+        name: "2",
+        image: "img/spaceship.png",
         score: 0,
-        leftKey: 'a',
-        rightKey: 'd',
-        strikeKey: 'z',
-        color: 'blue',
-      },
-    ],
+        leftKey: "a",
+        rightKey: "d",
+        strikeKey: "z",
+        color: "blue"
+      }
+    ]
   };
 
   static idResolver = new IdGenerator();
@@ -55,18 +55,18 @@ export class Game {
 
   static speedGame = {
     counter: 0,
-    speed: 1,
+    speed: 1
   };
 
   static imageResources = {
     spaceship: {
-      resourse: 'img/spaceship.png',
-      image: null,
+      resourse: "img/spaceship.png",
+      image: null
     },
     enemy: {
-      resourse: 'img/asteroid.png',
-      image: null,
-    },
+      resourse: "img/asteroid.png",
+      image: null
+    }
   };
 
   constructor() {
@@ -80,7 +80,7 @@ export class Game {
     window.setInterval(() => {
       Game.speedGame.counter++;
       counter++;
-      if (counter > (25 / Game.speedGame.speed)) {
+      if (counter > 25 / Game.speedGame.speed) {
         Game.entities.push(new Enemy());
         counter = 0;
       }
@@ -93,10 +93,10 @@ export class Game {
         spaceship: [],
         enemy: [],
         bullet: [],
-        infoBlockPlayer: [],
+        infoBlockPlayer: []
       };
 
-      Game.entities.forEach((entity) => {
+      Game.entities.forEach(entity => {
         entity.move();
 
         if (!entity.isOnScrean()) {
@@ -106,16 +106,25 @@ export class Game {
         }
       });
 
-      entitiesByType.bullet.forEach((bullet) => {
-        entitiesByType.enemy.some((enemy) => {
-          const distance = Math.sqrt(Math.pow(enemy.x - bullet.x, 2)
-            + Math.pow(enemy.y - bullet.y, 2));
+      entitiesByType.bullet.forEach(bullet => {
+        entitiesByType.enemy.some(enemy => {
+          const distance = Math.sqrt(
+            Math.pow(enemy.x - bullet.x, 2) +
+              Math.pow(
+                enemy.y - bullet.y,
+
+                2
+              )
+          );
 
           if (enemy.radius + bullet.radius > distance) {
             Game.garbageCollector.collect(enemy.id);
             Game.garbageCollector.collect(bullet.id);
-            const spaceship = Game.options.spaceships.find(s => s.name === bullet.nameSpaceship);
+            const spaceship = Game.options.spaceships.find(
+              s => s.name === bullet.nameSpaceship
+            );
             spaceship.score += Math.round(enemy.speed * 10);
+
             return true;
           }
 
@@ -123,10 +132,12 @@ export class Game {
         });
       });
 
-      entitiesByType.spaceship.forEach((spaceship) => {
-        entitiesByType.enemy.some((enemy) => {
-          const distance = Math.sqrt(Math.pow(enemy.x - spaceship.x, 2)
-            + Math.pow(enemy.y - spaceship.y, 2));
+      entitiesByType.spaceship.forEach(spaceship => {
+        entitiesByType.enemy.some(enemy => {
+          const distance = Math.sqrt(
+            Math.pow(enemy.x - spaceship.x, 2) +
+              Math.pow(enemy.y - spaceship.y, 2)
+          );
 
           if (enemy.radius + spaceship.radius > distance) {
             Game.garbageCollector.collect(enemy.id);
@@ -141,12 +152,11 @@ export class Game {
         });
       });
 
-
       Game.entities = Game.garbageCollector.removeEntities(Game.entities);
 
       Game.ctx.clearRect(0, 0, Game.size.width, Game.size.height);
 
-      Game.entities.forEach((entity) => {
+      Game.entities.forEach(entity => {
         entity.draw();
       });
     }, 20);
@@ -159,7 +169,7 @@ export class Game {
       Game.imageResources.spaceship.image = img1;
     };
 
-    Game.options.spaceships.forEach((spaceship) => {
+    Game.options.spaceships.forEach(spaceship => {
       Game.entities.push(new Spaceship(spaceship));
       Game.entities.push(new InfoBlockPlayer(spaceship));
     });

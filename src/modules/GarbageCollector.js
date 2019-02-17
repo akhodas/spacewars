@@ -4,7 +4,9 @@ export class GarbageCollector {
   }
 
   removeEntities(entities) {
-    const filtered = entities.filter(entity => !this._collection.includes(entity.id));
+    const filtered = entities.filter(
+      entity => !this._collection.includes(entity.id)
+    );
 
     this._collection = [];
 

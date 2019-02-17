@@ -1,14 +1,14 @@
-import { Bullet } from './Bullet';
-import { Entity } from './Entity';
+import { Bullet } from "./Bullet";
+import { Entity } from "./Entity";
 
 export class Spaceship extends Entity {
   constructor(config) {
     super({
-      type: 'spaceship',
+      type: "spaceship",
       x: Game.size.width / 2,
       y: Game.size.height - Game.size.height * 0.1,
       width: Game.size.width * 0.055,
-      height: Game.size.height * 0.055,
+      height: Game.size.height * 0.055
     });
     this.radius = this.width / 2;
     this.config = config;
@@ -17,14 +17,14 @@ export class Spaceship extends Entity {
       this.eventListener = () => {
         this.strike();
       };
-      window.addEventListener('click', this.eventListener);
+      window.addEventListener("click", this.eventListener);
     } else {
-      this.eventListener = (event) => {
+      this.eventListener = event => {
         if (event.key === this.config.strikeKey) {
           this.strike();
         }
       };
-      window.addEventListener('keydown', this.eventListener);
+      window.addEventListener("keydown", this.eventListener);
     }
   }
 
@@ -41,15 +41,17 @@ export class Spaceship extends Entity {
       this.x - this.radius,
       this.y - this.radius,
       this.width,
-      this.width,
+      this.width
     );
-    Game.ctx.fillStyle = 'white';
+    Game.ctx.fillStyle = "white";
     Game.ctx.font = `${0.7 * this.radius}px Arial`;
-    Game.ctx.textAlign = 'center';
+    Game.ctx.textAlign = "center";
     Game.ctx.fillText(
-      Game.options.spaceships.find(spaceship => spaceship.name === this.config.name).score,
+      Game.options.spaceships.find(
+        spaceship => spaceship.name === this.config.name
+      ).score,
       this.x,
-      this.y + 1.7 * this.radius,
+      this.y + 1.7 * this.radius
     );
   }
 
@@ -72,16 +74,18 @@ export class Spaceship extends Entity {
   }
 
   strike() {
-    Game.entities.push(new Bullet({
-      x: this.x,
-      y: this.y,
-      nameSpaceship: this.config.name,
-      colorSpaceship: this.config.color,
-    }));
+    Game.entities.push(
+      new Bullet({
+        x: this.x,
+        y: this.y,
+        nameSpaceship: this.config.name,
+        colorSpaceship: this.config.color
+      })
+    );
   }
 
   destroy() {
-    window.removeEventListener('click', this.eventListener);
-    window.removeEventListener('keydown', this.eventListener);
+    window.removeEventListener("click", this.eventListener);
+    window.removeEventListener("keydown", this.eventListener);
   }
 }
